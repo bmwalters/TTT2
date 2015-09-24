@@ -1,0 +1,7 @@
+"ttt2"
+{
+	"base"		"base"
+	"title"		"TTT2"
+	"maps"		"^ttt_"
+	"menusystem"	"1"
+}
