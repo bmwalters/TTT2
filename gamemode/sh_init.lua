@@ -111,3 +111,57 @@ function GM:RoundEnd()
 	self.NextRoundState = CurTime() + 20
 	self:ChatMessage(nil, "Round ended.")
 end
+
+local function IsBitSet(bitflag, field)
+	return bit.band(bitflag, field) == field
+end
+local function IsBitUnset(bitflag, field)
+	return bit.band(bitflag, field) ~= field
+end
+
+function GM:GetAlivePlayers()
+	local players = {}
+	for _, ply in ipairs(player.GetAll()) do
+		if ply:Alive() and ply:Team() ~= TEAM_SPECTATOR then
+			players[#players + 1] = ply
+		end
+	end
+	return players
+end
+
+function GM:PlayerTick(ply, mov)
+	-- Handle keys/binds
+	local keys = mov:GetButtons()
+	local keys_last = mov:GetOldButtons()
+
+	ply.IsTeamTalking = IsBitSet(keys, IN_SPEED)
+
+	if SERVER and ply:Team() == TEAM_SPECTATOR then
+		local direction
+		if IsBitSet(keys, IN_ATTACK) and IsBitUnset(keys_last, IN_ATTACK) then
+			direction = 1 -- next target
+		elseif IsBitSet(keys, IN_ATTACK2) and IsBitUnset(keys_last, IN_ATTACK2) then
+			direction = -1 -- prev target
+		end
+
+		-- change observer target to next
+		if direction then
+			local players = self:GetAlivePlayers()
+
+			local curtarget = ply:GetObserverTarget()
+			if not curtarget:IsPlayer() then curtarget = players[math.random(1, #players)] end
+
+			for i, ply in ipairs(players) do
+				if ply == curtarget then
+					local newi = i + direction
+					if newi < 1 then newi = #players end
+					if newi > #players then newi = 0 end
+
+					ply:SpectateEntity(players[newi])
+
+					break
+				end
+			end
+		end
+	end
+end

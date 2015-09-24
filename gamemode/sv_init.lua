@@ -5,6 +5,8 @@ util.AddNetworkString("TTT2_SetRoundState")
 util.AddNetworkString("TTT2_Roles")
 
 function GM:PlayerInitialSpawn(ply)
+	ply:SetCanZoom(false)
+
 	local players = player.GetAll()
 
 	if self:GetRoundState() == ROUND_WAIT and #players >= 2 then
@@ -106,6 +108,14 @@ function GM:SetRoundState(state)
 	elseif state == ROUND_POST then
 		self:RoundEnd()
 	end
+end
+
+function GM:PlayerCanHearPlayersVoice(listener, talker)
+	local lr, tr = listener.Role, talker.Role
+	if talker.IsTeamTalking and tr == ROLE_TRAITOR and lr ~= tr then
+		return false
+	end
+	return true
 end
 
 --[[

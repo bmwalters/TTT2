@@ -24,3 +24,8 @@ net.Receive("TTT2_Roles", function(len)
 		ply.Role = net.ReadUInt(3)
 	end
 end)
+
+concommand.Remove("undo")
+concommand.Remove("gmod_undo")
+concommand.Add("undo", print) -- drop ammo
+concommand.Add("gmod_undo", print) -- drop ammo
