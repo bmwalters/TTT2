@@ -112,7 +112,7 @@ end
 
 function GM:PlayerCanHearPlayersVoice(listener, talker)
 	local lr, tr = listener.Role, talker.Role
-	if talker.IsTeamTalking and tr == ROLE_TRAITOR and lr ~= tr then
+	if talker.IsTeamTalking and tr == ROLE_TRAITOR and lr ~= ROLE_TRAITOR then
 		return false
 	end
 	return true
