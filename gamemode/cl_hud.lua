@@ -92,7 +92,7 @@ function GM:HUDPaint()
 
 	surface.SetFont("TTT2_HealthAmmo")
 
-	local health_cur, health_max = client:Health(), client:GetMaxHealth()
+	local health_cur, health_max = math.Clamp(client:Health(), 0, client:GetMaxHealth()), client:GetMaxHealth()
 	local health_ratio = health_cur/health_max
 
 	local hbary = bgy + rolebarh + habarpaddingy

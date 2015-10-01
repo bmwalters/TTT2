@@ -1,5 +1,6 @@
 GM.Name = "TTT2"
 GM.Author = "Zerf & Bad King"
+GM.TeamBased = false
 
 local function inc(f)
 	local realm = string.sub(f, 1, 2)
@@ -17,6 +18,7 @@ end
 inc("sh_enums.lua")
 inc("sh_message.lua")
 inc("cl_hud.lua")
+inc("sh_tttcompat.lua")
 
 team.SetUp(TEAM_TTT2, "TTT2 Player", color_white)
 
@@ -149,7 +151,7 @@ function GM:PlayerTick(ply, mov)
 			local players = self:GetAlivePlayers()
 
 			local curtarget = ply:GetObserverTarget()
-			if not curtarget:IsPlayer() then curtarget = players[math.random(1, #players)] end
+			if not (IsValid(curtarget) and curtarget:IsPlayer()) then curtarget = players[math.random(1, #players)] end
 
 			for i, ply in ipairs(players) do
 				if ply == curtarget then
