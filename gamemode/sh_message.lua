@@ -13,7 +13,6 @@ if CLIENT then
 			local f = ic and net.ReadColor or net.ReadString
 			msg[#msg + 1] = f()
 		end
-		PrintTable(msg)
 		chat.AddText(unpack(msg))
 	end)
 end

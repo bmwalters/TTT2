@@ -241,7 +241,10 @@ end
 function SWEP:SetIronSights(b)
 	local fov = b and self.IronSightsFOV or 0
 
-	self:GetOwner():SetFOV(fov, 0.4)
+	local owner = self:GetOwner()
+	if IsValid(owner) and owner:IsPlayer() then
+		self:GetOwner():SetFOV(fov, 0.4)
+	end
 
 	self:SetNWBool("IronSights", b)
 end
@@ -296,11 +299,13 @@ if CLIENT then
 	function SWEP:DoDrawCrosshair(x, y)
 		local client = LocalPlayer()
 
-		local sights = self:GetIronsights()
+		local sights = self:GetIronSights()
 
 		local LastShootTime = self:LastShootTime()
 
-		local scale = math.max(0.2,  10 * self:GetPrimaryCone())
+		local acc = sights and self.Primary.SpreadIron or self.Primary.Spread
+
+		local scale = math.max(0.2,  8 * acc)
 		scale = scale * (2 - math.Clamp((CurTime() - LastShootTime) * 5, 0.0, 1.0))
 
 		local alpha = sights and 0.8 or 1

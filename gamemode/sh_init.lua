@@ -18,6 +18,8 @@ end
 inc("sh_enums.lua")
 inc("sh_message.lua")
 inc("cl_hud.lua")
+inc("cl_hud_voice.lua")
+inc("cl_hud_wepswitch.lua")
 inc("sh_tttcompat.lua")
 
 team.SetUp(TEAM_TTT2, "TTT2 Player", color_white)
@@ -56,6 +58,16 @@ function GM:Initialize()
 	if #(file.Find("*", "cstrike")) == 0 then
 		print("TTT2 WARNING: CS:S does not appear to be mounted by GMod. This may result in broken models and other problems.")
 	end
+end
+
+GM.RoleColors = {
+	[ROLE_INNOCENT] = Color(25, 200, 25, 200),
+	[ROLE_TRAITOR] = Color(200, 25, 25, 200),
+	[ROLE_DETECTIVE] = Color(25, 25, 200, 200),
+}
+
+function GM:GetRoleColor(role)
+	return self.RoleColors[role]
 end
 
 function GM:GetRoundState()
@@ -164,6 +176,19 @@ function GM:PlayerTick(ply, mov)
 					break
 				end
 			end
+		end
+	end
+end
+
+-- THE FOLLOWING IS A TEMPORARY SOLUTION. See: https://facepunch.com/showthread.php?t=1485127&p=48827919&viewfull=1#post48827919
+function GM:StartCommand(ply, cmd)
+	if ply._WeaponToSwitch then
+		cmd:SelectWeapon(ply._WeaponToSwitch)
+
+		if ply:GetActiveWeapon() == ply._WeaponToSwitch then
+			-- hook.Run("PlayerSwitchWeapon", ply._WeaponBeforeSwitch, ply:GetActiveWeapon()) -- call the default gmod hook which would not be ran otherwise due to hiding the hud element
+			ply._WeaponToSwitch = nil
+			ply._WeaponBeforeSwitch = nil
 		end
 	end
 end

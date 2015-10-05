@@ -3,14 +3,7 @@ local color_healthbar = Color(200, 50, 50)
 local color_healthbarbg = Color(100, 25, 25, 222)
 local color_ammobar = Color(205, 155, 0)
 local color_ammobarbg = Color(20, 20, 5, 222)
-
-local rolecolors = {
-	[ROLE_INNOCENT] = Color(25, 200, 25, 200),
-	[ROLE_TRAITOR] = Color(200, 25, 25, 200),
-	[ROLE_DETECTIVE] = Color(25, 25, 200, 200),
-
-	[false] = Color(100, 100, 100, 200), -- round isn't active
-}
+local color_roundinactive = Color(100, 100, 100, 200)
 
 local rolestring = {
 	[ROLE_INNOCENT] = "INNOCENT",
@@ -19,6 +12,7 @@ local rolestring = {
 }
 
 local roundstatestring = {
+	[ROUND_ACTIVE] = "IN PROGRESS",
 	[ROUND_WAIT] = "WAITING",
 	[ROUND_PREP] = "PREPARING",
 	[ROUND_POST] = "ROUND OVER",
@@ -69,13 +63,13 @@ function GM:HUDPaint()
 	surface.DrawRect(bgx, bgy, bgw, bgh)
 
 	local rolebarw, rolebarh = 170, 30
-	surface.SetDrawColor(rolecolors[role])
+	surface.SetDrawColor(role and self:GetRoleColor(role) or color_roundinactive)
 	surface.DrawRect(bgx, bgy, rolebarw, rolebarh)
 
 	surface.SetTextColor(color_white)
 
 	surface.SetFont("TTT2_TimeLeft")
-	local timetext = string.FormattedTime(self.NextRoundState and self.NextRoundState - CurTime() or 0, "%2i:%02i") -- todo
+	local timetext = string.FormattedTime(math.max(self.NextRoundState and self.NextRoundState - CurTime() or 0, 0), "%02i:%02i") -- todo
 	local timetextw, timetexth = surface.GetTextSize(timetext)
 	surface.SetTextPos(bgx + rolebarw + ((bgw - rolebarw) - timetextw) / 2, bgy + (rolebarh - timetexth) / 2)
 	surface.DrawText(timetext)
@@ -120,6 +114,8 @@ function GM:HUDPaint()
 		surface.SetTextPos(bgx + bgw - habarpaddingx - 10 - ammotextw, hbary + habarpaddingy + habarh + (habarh - ammotexth) / 2)
 		surface.DrawText(ammotext)
 	end
+
+	hook.Run("HUDDrawWeaponSwitch")
 end
 
 local shoulddraw = {
@@ -127,6 +123,7 @@ local shoulddraw = {
 	CHudSecondaryAmmo = false,
 	CHudHealth = false,
 	CHudBattery = false,
+	CHudWeaponSelection = false,
 	-- CHudDamageIndicator = false,
 }
 

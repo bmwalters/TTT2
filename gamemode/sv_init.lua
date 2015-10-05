@@ -7,9 +7,7 @@ util.AddNetworkString("TTT2_Roles")
 function GM:PlayerInitialSpawn(ply)
 	ply:SetCanZoom(false)
 
-	local players = player.GetAll()
-
-	if self:GetRoundState() == ROUND_WAIT and #players >= 2 then
+	if self:GetRoundState() == ROUND_WAIT and #player.GetAll() >= 2 then
 		self:SetRoundState(ROUND_PREP)
 	end
 
@@ -22,20 +20,28 @@ function GM:PlayerInitialSpawn(ply)
 	end
 end
 
+function GM:PlayerDisconnected(ply)
+	if self:GetRoundState() ~= ROUND_WAIT and #player.GetAll() < 2 then
+		self:SetRoundState(ROUND_WAIT)
+	end
+end
+
 function GM:PlayerSetModel(ply)
 	ply:SetModel("models/player/odessa.mdl")
 	ply:SetColor(color_white)
 end
 
 function GM:PlayerLoadout(ply)
-	ply:Give("weapon_crowbar")
-	ply:Give("weapon_base_z")
+	ply:Give("weapon_ttt2_pistol")
 end
 
 function GM:PlayerSpawn(ply)
 	hook.Run("PlayerLoadout", ply)
 
 	hook.Run("PlayerSetModel", ply)
+
+	ply:Give("weapon_crowbar")
+	ply:SelectWeapon("weapon_crowbar")
 
 	if IsValid(ply) and not ply:IsBot() then
 		ply:SetupHands()
@@ -137,9 +143,7 @@ function GM:EntityTakeDamage(ent, dmginfo)
 			dmginfo:SetDamage(0)
 		end
 	elseif isexplosive then
-		-- When a barrel hits a player, that player damages the barrel because
-		-- Source physics. This gives stupid results like a player who gets hit
-		-- with a barrel being blamed for killing himself or even his attacker.
+		-- prevent players dying from barrels being blamed for their own death
 		if IsValid(att) and att:IsPlayer() and dmginfo:IsDamageType(DMG_CRUSH) and IsValid(ent:GetPhysicsAttacker()) then
 			dmginfo:SetAttacker(ent:GetPhysicsAttacker())
 			dmginfo:ScaleDamage(0)
@@ -286,7 +290,7 @@ GM.DeathSounds = {
 	Sound("vo/npc/Barney/ba_pain06.wav"),
 	Sound("vo/npc/Barney/ba_pain07.wav"),
 	Sound("vo/npc/Barney/ba_pain09.wav"),
-	Sound("vo/npc/Barney/ba_ohshit03.wav"), --heh
+	Sound("vo/npc/Barney/ba_ohshit03.wav"), -- heh
 	Sound("vo/npc/Barney/ba_no01.wav"),
 	Sound("vo/npc/male01/no02.wav"),
 	Sound("hostage/hpain/hpain1.wav"),
@@ -365,7 +369,6 @@ function GM:OnPlayerHitGround(ply, inwater, onfloater, speed)
 			--[[
 			local push = ply.was_pushed
 			if push then
-				-- TODO: move push time checking stuff into fn?
 				if math.max(push.t or 0, push.hurt or 0) > CurTime() - 4 then
 					att = push.att
 				end
