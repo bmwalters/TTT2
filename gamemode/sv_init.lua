@@ -6,6 +6,10 @@ util.AddNetworkString("TTT2_Roles")
 
 function GM:PlayerInitialSpawn(ply)
 	ply:SetCanZoom(false)
+	ply:SetJumpPower(160)
+	ply:SetWalkSpeed(220)
+	ply:SetRunSpeed(220) -- ply:SprintDisable(true) currently broken
+	ply:SetCrouchedWalkSpeed(0.3)
 
 	if self:GetRoundState() == ROUND_WAIT and #player.GetAll() >= 2 then
 		self:SetRoundState(ROUND_PREP)
@@ -33,15 +37,15 @@ end
 
 function GM:PlayerLoadout(ply)
 	ply:Give("weapon_ttt2_pistol")
+	ply:Give("weapon_ttt2_smg")
 end
 
 function GM:PlayerSpawn(ply)
 	hook.Run("PlayerLoadout", ply)
-
 	hook.Run("PlayerSetModel", ply)
 
-	ply:Give("weapon_crowbar")
-	ply:SelectWeapon("weapon_crowbar")
+	ply:Give("weapon_ttt2_crowbar")
+	ply:SelectWeapon("weapon_ttt2_crowbar")
 
 	if IsValid(ply) and not ply:IsBot() then
 		ply:SetupHands()

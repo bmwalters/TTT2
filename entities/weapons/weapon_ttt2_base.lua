@@ -7,12 +7,11 @@ if CLIENT then
 	SWEP.Author		= "Zerf, Bad King, Clavus"
 	SWEP.Category	= "TTT"
 
-	SWEP.Slot		= 1
-	SWEP.SlotPos	= 1
-
 	SWEP.DrawCrosshair	= true
 	SWEP.DrawAmmo		= true
 end
+
+SWEP.Slot		= 1
 
 SWEP.Spawnable	= true
 SWEP.AdminOnly	= false
@@ -23,7 +22,7 @@ SWEP.WorldModel		= "models/weapons/w_pistol.mdl"
 SWEP.ViewModelFlip	= false
 SWEP.UseHands		= true
 SWEP.HoldType		= "pistol"
-SWEP.DeploySpeed	= 1.4
+SWEP.DeploySpeed	= 1.0
 
 SWEP.AutoSwitchTo	= true
 SWEP.AutoSwitchFrom	= false
@@ -51,22 +50,24 @@ SWEP.IronSightsPos = Vector(-5.75, -14, 2.4)
 SWEP.IronSightsAng = Vector(2.6, -1.5, 1.5)
 SWEP.IronSightsFOV = 0
 
-SWEP.ShootSound		= Sound("Weapon_Pistol.Single")
-SWEP.ReloadSound	= Sound("Weapon_Pistol.Reload")
-SWEP.EmptySound		= Sound("Weapon_Pistol.Empty")
+SWEP.Sounds = {
+	shoot = Sound("Weapon_Pistol.Single"),
+	reload = Sound("Weapon_Pistol.Reload"),
+	empty = Sound("Weapon_Pistol.Empty"),
+}
 
 function SWEP:Initialize()
 	self:SetHoldType(self.HoldType)
 	self:SetDeploySpeed(self.DeploySpeed)
 
-	self.ShootSound = self.ShootSound or ""
-	self.ReloadSound = self.ReloadSound or ""
-	self.EmptySound = self.EmptySound or ""
+	if self.Primary.Spread then
+		self.Primary.SpreadIron = self.Primary.SpreadIron or self.Primary.Spread * 0.85
+		self.Primary.RecoilIron = self.Primary.RecoilIron or self.Primary.Recoil * 0.6
+	end
 
-	self.Primary.SpreadIron = self.Primary.SpreadIron or self.Primary.Spread * 0.85
-	self.Primary.RecoilIron = self.Primary.RecoilIron or self.Primary.Recoil * 0.6
-
-	self:SetIronSights(false)
+	if self.IronSightsPos or self.IronSightsAng or self.IronSightsFOV then
+		self:SetIronSights(false)
+	end
 
 	if CLIENT then
 		self:SCK_Initialize()
@@ -113,13 +114,13 @@ end
 
 function SWEP:CanPrimaryAttack()
 	if self:Clip1() <= 0 then
-		self:EmitSound(self.EmptySound)
+		if self.Sounds.empty then self:EmitSound(self.Sounds.empty) end
 		self:Reload()
 		return false
 	end
 
 	if self:GetOwner():WaterLevel() >= 3 and not self.FiresUnderwater then
-		self:EmitSound(self.EmptySound)
+		if self.Sounds.empty then self:EmitSound(self.Sounds.empty) end
 		return false
 	end
 
@@ -152,10 +153,13 @@ function SWEP:PrimaryAttack()
 	bullet.Damage	= self.Primary.Damage
 	bullet.AmmoType	= self.Primary.Ammo
 
-
 	owner:FireBullets(bullet)
-	self:ShootEffects()
-	self:EmitSound(self.ShootSound)
+
+	self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+	owner:MuzzleFlash()
+	owner:SetAnimation(PLAYER_ATTACK1)
+
+	if self.Sounds.shoot then self:EmitSound(self.Sounds.shoot) end
 
 	-- local rnda = self.Recoil * -1
 	-- local rndb = self.Recoil * math.random(-1, 1)
@@ -190,10 +194,11 @@ function SWEP:Reload()
 	self:SetClip1(self:Clip1() + ammocnt)
 
 	self:SendWeaponAnim(ACT_VM_RELOAD)
+	owner:SetAnimation(PLAYER_RELOAD)
 	local animtime = owner:GetViewModel():SequenceDuration()
 	self.ReloadingTime = CurTime() + animtime
 	self:SetNextPrimaryFire(CurTime() + animtime)
-	self:EmitSound(self.ReloadSound, nil, nil, nil, CHAN_WEAPON) -- CHAN_ITEM
+	if self.Sounds.reload then self:EmitSound(self.Sounds.reload, nil, nil, nil, CHAN_WEAPON) end -- CHAN_ITEM
 end
 
 function SWEP:PreDrop()
@@ -254,7 +259,7 @@ function SWEP:GetIronSights()
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
-	if not self.IronSightsPos then return pos, ang end
+	if not (self.IronSightsPos or self.IronSightsAng) then return pos, ang end
 
 	local ironsights = self:GetIronSights()
 
