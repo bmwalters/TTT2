@@ -1,4 +1,4 @@
-function enum(prefix)
+local function enum(prefix)
 	return function(tab)
 		for i, v in ipairs(tab) do
 			_G[prefix .. "_" .. v] = i
