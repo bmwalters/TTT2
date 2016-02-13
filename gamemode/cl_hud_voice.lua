@@ -1,6 +1,6 @@
 -- Player voice chat panel, modified from base gamemode
 local PANEL = {}
-local PlayerVoicePanels = {}
+local PlayerVoicePanels = setmetatable({}, {__mode = "k"})
 
 function PANEL:Init()
 	self.LabelName = vgui.Create("DLabel", self)
@@ -47,7 +47,7 @@ function PANEL:Think()
 	end
 end
 
-function PANEL:FadeOut(anim, delta, data)
+function PANEL:FadeOut(anim, delta)
 	if anim.Finished then
 		if IsValid(PlayerVoicePanels[self.ply]) then
 			PlayerVoicePanels[self.ply]:Remove()
@@ -80,10 +80,10 @@ function GM:PlayerStartVoice(ply)
 
 	if not IsValid(ply) then return end
 
-	local pnl = self.VoicePanelList:Add("VoiceNotify")
-	pnl:Setup(ply)
+	local entry = vgui.Create("VoiceNotify", self.VoicePanelList)
+	entry:Setup(ply)
 
-	PlayerVoicePanels[ply] = pnl
+	PlayerVoicePanels[ply] = entry
 end
 
 function GM:PlayerEndVoice(ply)
@@ -108,7 +108,7 @@ hook.Add("InitPostEntity", "TTT2_CreateVoiceVGUI", function()
 	list:ParentToHUD()
 	list:SetPos(300, 200)
 	list:SetSize(250, ScrH() - 200)
-	list:SetDrawBackground(false)
+	list:SetPaintBackground(false)
 
 	GAMEMODE.VoicePanelList = list
 end)

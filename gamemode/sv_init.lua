@@ -52,7 +52,8 @@ function GM:PlayerSpawn(ply)
 	end
 end
 
-function GM:CanPlayerSuicide()
+function GM:CanPlayerSuicide(ply)
+	print(ply, ply:Team(), TEAM_TTT2)
 	return ply:Team() == TEAM_TTT2
 end
 
@@ -177,7 +178,7 @@ function GM:IsSpawnpointSuitable(ply, spawnpoint, force)
 	return true
 end
 
-local spawnpointents = {
+local spawnpointclasses = {
 	info_player_start = true,
 	gmod_player_start = true,
 	info_player_teamspawn = true,
@@ -217,7 +218,7 @@ function GM:GetSpawnpointEnts()
 	local spawns = {}
 
 	for _, ent in pairs(ents.GetAll()) do
-		if spawnpointents[ent:GetClass()] then
+		if spawnpointclasses[ent:GetClass()] then
 			spawns[#spawns + 1] = ent
 		end
 	end
