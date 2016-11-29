@@ -4,7 +4,7 @@ SWEP.Base = "weapon_base"
 
 if CLIENT then
 	SWEP.PrintName	= "TTT2 Base"
-	SWEP.Author		= "Zerf, Bad King, Clavus"
+	SWEP.Author		= "Zerf, Bad King, Clavus and Velkon"
 	SWEP.Category	= "TTT"
 
 	SWEP.DrawCrosshair	= true
